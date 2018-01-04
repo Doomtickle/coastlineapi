@@ -56,7 +56,7 @@ class PropertiesController extends Controller
      */
     public function show($id)
     {
-        $property = Property::with(['photos', 'rates'])->findOrFail($id);
+        $property = Property::with(['photos', 'rates'])->where('kigo_id', $id)->firstOrFail();
 
         return response()->json($property);
     }

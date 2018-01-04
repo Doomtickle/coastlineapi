@@ -15,7 +15,7 @@ class CreatePropertiesTable extends Migration
     {
         Schema::create('properties', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('kigo_id');
+            $table->integer('kigo_id')->index();
             $table->integer('beds');
             $table->integer('baths');
             $table->integer('sleeps');

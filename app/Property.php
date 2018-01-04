@@ -69,6 +69,16 @@ class Property extends Model
     }
 
     /**
+     * Find the lowest rate for the given property
+     *
+     * @return \Illuminate\Database\Eloquent\Collection;
+     */
+    public function getLowestRate()
+    {
+        return Rate::where('property_id', $this->id)->where('price', '!=', 0)->min('price');
+    }
+
+    /**
      * Return info for the property with the given ID
      *
      * @param integer $propertyId

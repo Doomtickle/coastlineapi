@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Rate;
 use App\ApiCall;
 use App\Builder;
 use App\Property;
@@ -16,7 +17,12 @@ class PropertiesController extends Controller
      */
     public function index()
     {
-        $properties = Property::with(['photos', 'rates'])->get();
+        $properties = Property::with(['photos'])->get();
+        foreach ($properties as $property) {
+            // Rates array is too large to display evertying for every property.
+            // Create dynamic property to get the lowest rate
+            $property->lowestRate = $property->getLowestRate();
+        }
 
         return response()->json($properties);
     }

@@ -4,9 +4,9 @@ namespace App;
 
 use App\Rate;
 use App\Photo;
+use App\Amenity;
 use App\ApiCall;
 use Illuminate\Database\Eloquent\Model;
-use function GuzzleHttp\json_decode;
 
 class Property extends Model
 {
@@ -30,6 +30,16 @@ class Property extends Model
     public function rates()
     {
         return $this->hasMany(Rate::class);
+    }
+
+    /**
+     * A property has many amenities
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function amenities()
+    {
+        return $this->hasMany(Amenity::class);
     }
 
     /**
@@ -69,25 +79,49 @@ class Property extends Model
     }
 
     /**
+     * Add rates to a property
+     *
+     * @param array $amenities
+     * @return void
+     */
+    public function addAmenities($amenities)
+    {
+        foreach ($amenities as $amenity) {
+            Amenity::create([
+                'text'            => $amenity->text,
+                'kigo_id'         => $this->kigo_id,
+                'property_id'     => $this->id,
+                'kigo_amenity_id' => $amenity->id,
+            ]);
+        }
+    }
+
+    /**
      * Find the lowest rate for the given property
      *
      * @return \Illuminate\Database\Eloquent\Collection;
      */
     public function getLowestRate()
     {
-        return Rate::where('property_id', $this->id)->where('price', '!=', 0)->min('price');
+        return Rate::where('property_id', $this->id)
+                   ->where('price', '!=', 0)
+                   ->min('price');
     }
 
     /**
      * Return info for the property with the given ID
      *
      * @param integer $propertyId
-     * @return void
+     * @return string
      */
     public static function info($propertyId)
     {
         $kigo     = new ApiCall();
-        $response = $kigo->get('https://www.kigoapis.com/core/v0.7/properties/'.$propertyId.'?options=Rates,AllImages');
+        $response = $kigo->get(
+            'https://www.kigoapis.com/core/v0.7/properties/'.
+            $propertyId.
+            '?options=Rates,AllImages,Amenities,Visibility,Reviews'
+        );
 
         return json_decode($response->getBody());
     }
@@ -95,7 +129,7 @@ class Property extends Model
     /**
      * Return a list of property IDs
      *
-     * @return void
+     * @return string
      */
     public static function list()
     {
@@ -109,7 +143,7 @@ class Property extends Model
      * Persist the property to the database
      *
      * @param array $propertyInfo
-     * @return void
+     * @return \App\Property
      */
     public static function add($propertyDetails)
     {
@@ -118,6 +152,7 @@ class Property extends Model
             'city'               => $propertyDetails->address->city,
             'name'               => $propertyDetails->privateName,
             'baths'              => $propertyDetails->bathrooms,
+            'rating'             => $propertyDetails->visibility->score,
             'sleeps'             => $propertyDetails->sleeps,
             'kigo_id'            => $propertyDetails->id,
             'summary'            => $propertyDetails->resourceStrings[0]->summary,

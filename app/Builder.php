@@ -21,6 +21,7 @@ class Builder extends Model
             $createdProperty = Property::add($propertyInfo);
             $createdProperty->addImages($propertyInfo->images);
             $createdProperty->addRates($propertyInfo->rates);
+            $createdProperty->addAmenities($propertyInfo->amenities);
         }
     }
 }

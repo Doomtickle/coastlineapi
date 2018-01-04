@@ -19,6 +19,7 @@ class CreatePropertiesTable extends Migration
             $table->integer('beds');
             $table->integer('baths');
             $table->integer('sleeps');
+            $table->float('rating');
             $table->boolean('is_active');
             $table->string('name');
             $table->string('city');
